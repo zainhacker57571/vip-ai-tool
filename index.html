@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ZAIN GHOST V66 - NEURAL ANALYTICS</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        :root { 
+            --gold: #ffcc00; --neon-red: #ff0033; --neon-blue: #00d4ff; --neon-green: #00ff88;
+            --bg: #0b0f19; --card: #151b2d; --text: #ffffff; --border: rgba(255, 255, 255, 0.05);
+        }
+        body.light-theme { --bg: #f0f2f5; --card: #ffffff; --text: #000000; --border: rgba(0,0,0,0.1); }
+
+        * { margin:0; padding:0; box-sizing:border-box; font-family: 'Rajdhani', sans-serif; }
+        body { background: var(--bg); color: var(--text); transition: 0.3s; overflow-x: hidden; }
+
+        /* --- LOGIN PAGE STYLES --- */
+        #login-overlay {
+            position: fixed; inset: 0; background: var(--bg); z-index: 10000;
+            display: flex; align-items: center; justify-content: center; padding: 20px;
+        }
+        .login-card {
+            background: var(--card); border: 2px solid var(--neon-blue); border-radius: 30px;
+            padding: 40px 20px; width: 100%; max-width: 380px; text-align: center;
+            box-shadow: 0 0 30px rgba(0, 212, 255, 0.2);
+        }
+        .login-logo { width: 80px; margin-bottom: 20px; filter: drop-shadow(0 0 10px var(--neon-blue)); }
+        .login-title { font-family: 'Orbitron'; font-size: 22px; margin-bottom: 10px; color: var(--neon-blue); }
+        .login-input {
+            width: 100%; background: rgba(255,255,255,0.05); border: 1px solid var(--border);
+            padding: 15px; border-radius: 12px; color: #fff; margin-bottom: 20px;
+            font-family: 'Orbitron'; text-align: center; font-size: 14px; outline: none;
+        }
+        .login-input:focus { border-color: var(--neon-blue); }
+        .btn-login {
+            width: 100%; background: linear-gradient(90deg, var(--neon-blue), var(--neon-red));
+            border: none; padding: 15px; border-radius: 12px; color: #fff;
+            font-family: 'Orbitron'; font-weight: 900; cursor: pointer; margin-bottom: 15px;
+        }
+        .login-footer { font-size: 12px; color: #888; }
+        .login-footer a { color: var(--gold); text-decoration: none; font-weight: bold; }
+
+        /* --- DASHBOARD STYLES (Existing) --- */
+        #main-app { width: 100%; max-width: 480px; margin: auto; padding: 15px; display: none; }
+        
+        .top-bar { display: flex; justify-content: space-between; font-size: 10px; color: #888; padding: 10px; }
+        .ai-engine-status { display: flex; align-items: center; gap: 8px; margin-bottom: 15px; background: var(--card); padding: 12px; border-radius: 15px; border: 1px solid var(--border); }
+        .ai-logo { width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--gold); box-shadow: 0 0 10px var(--gold); }
+
+        .neural-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
+        .neural-card { background: var(--card); padding: 15px; border-radius: 12px; border: 1px solid var(--border); text-align: center; }
+        .neural-label { font-size: 8px; color: #888; font-family: 'Orbitron'; text-transform: uppercase; margin-bottom: 5px; }
+        .neural-value { font-size: 18px; color: var(--neon-blue); font-weight: 900; font-family: 'Orbitron'; }
+
+        .result-card { background: var(--card); border-radius: 25px; padding: 30px 15px; text-align: center; margin-bottom: 15px; border: 1px solid var(--border); box-shadow: 0 10px 30px rgba(0,0,0,0.2); position: relative; overflow: hidden; }
+        .pred-text { font-family: 'Orbitron'; font-size: 65px; font-weight: 900; line-height: 1; margin: 15px 0; letter-spacing: 5px; }
+        
+        .action-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
+        .btn { padding: 12px; border-radius: 10px; border: none; font-size: 10px; font-weight: 900; font-family: 'Orbitron'; cursor: pointer; }
+        .btn-gold { background: var(--gold); color: #000; }
+        .btn-outline { background: transparent; color: var(--neon-blue); border: 1px solid var(--neon-blue); }
+
+        .history-table { width: 100%; background: var(--card); border-radius: 15px; border-collapse: collapse; overflow: hidden; margin-bottom: 100px; }
+        .history-table th { font-size: 9px; padding: 12px; background: rgba(0,0,0,0.2); color: #888; text-transform: uppercase; }
+        .history-table td { padding: 12px; text-align: center; font-size: 11px; border-bottom: 1px solid var(--border); font-weight: 700; }
+
+        .tg-link { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); width: 90%; background: linear-gradient(90deg, #0088cc, #00d4ff); color: #fff; padding: 18px; border-radius: 20px; text-align: center; font-family: 'Orbitron'; font-weight: 900; text-decoration: none; box-shadow: 0 10px 20px rgba(0,136,204,0.3); z-index: 100; }
+
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+        .analyzing { font-size: 10px; color: var(--gold); animation: pulse 1s infinite; font-family: 'Orbitron'; }
+    </style>
+</head>
+<body class="dark-theme">
+
+<div id="login-overlay">
+    <div class="login-card">
+        <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" class="login-logo">
+        <h2 class="login-title">ZAIN GHOST VIP</h2>
+        <p style="font-size: 10px; margin-bottom: 25px; opacity: 0.7;">ENTER PREMIUM KEY TO ACCESS NEURAL CORE</p>
+        
+        <input type="text" id="vip-key" class="login-input" placeholder="ENTER ACCESS KEY">
+        <button class="btn-login" onclick="validateKey()">ACTIVATE SYSTEM</button>
+        
+        <div class="login-footer">
+            NEED A KEY? <br>
+            <a href="https://t.me/Zain_ModX">CONTACT OWNER VIA TELEGRAM</a>
+        </div>
+    </div>
+</div>
+
+<div id="main-app">
+    <div class="top-bar">
+        <span id="d-model">LINUX ARMv8</span>
+        <span id="d-batt">BATT: 66%</span>
+        <span id="d-time">9:31 PM</span>
+    </div>
+
+    <div class="ai-engine-status">
+        <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" class="ai-logo">
+        <div>
+            <div style="font-size: 12px; font-weight: 900; font-family: 'Orbitron';">ZAIN AI ANALYTICS SERVER</div>
+            <div class="analyzing">● NEURAL CORE ACTIVE</div>
+        </div>
+    </div>
+
+    <div class="neural-grid">
+        <div class="neural-card">
+            <div class="neural-label">Pattern Recognition</div>
+            <div id="val-pattern" class="neural-value">0%</div>
+        </div>
+        <div class="neural-card">
+            <div class="neural-label">Trend Analysis</div>
+            <div id="val-trend" class="neural-value">0%</div>
+        </div>
+        <div class="neural-card">
+            <div class="neural-label">Sequence Detection</div>
+            <div id="val-sequence" class="neural-value">0%</div>
+        </div>
+        <div class="neural-card">
+            <div class="neural-label">Volatility Index</div>
+            <div id="val-volat" class="neural-value">0%</div>
+        </div>
+    </div>
+
+    <div class="action-row">
+        <button class="btn btn-gold" onclick="toggleTheme()">SWITCH THEME</button>
+        <button class="btn btn-outline" onclick="alert('Use Level 3 Martingale Strategy')">BEGINNER GUIDE</button>
+    </div>
+
+    <div class="result-card">
+        <div id="period-id" style="font-size: 10px; color: #888; font-family: 'Orbitron';">PERIOD: 2026011100010514</div>
+        <div id="main-pred" class="pred-text" style="color: var(--neon-red);">---</div>
+        <div style="display: flex; justify-content: space-around; font-family: 'Orbitron'; margin-top: 15px;">
+            <div>NUM: <span id="res-num" style="color: var(--gold);">--</span></div>
+            <div>TIMER: <span id="timer" style="color: var(--neon-blue);">00:00</span></div>
+        </div>
+    </div>
+
+    <table class="history-table">
+        <thead>
+            <tr><th>PERIOD</th><th>NUM</th><th>COLOR</th><th>SIZE</th><th>STATUS</th></tr>
+        </thead>
+        <tbody id="h-body"></tbody>
+    </table>
+
+    <a href="https://t.me/Zain_ModX" class="tg-link">JOIN ZAIN PRIVATE VIP SIGNALS</a>
+</div>
+
+<script>
+    let lastP = "";
+    let currentPred = "";
+    let historyData = [];
+
+    // --- KEY VALIDATION LOGIC ---
+    function validateKey() {
+        const inputKey = document.getElementById('vip-key').value;
+        const correctKey = "ZainHackerOntop";
+
+        if(inputKey === correctKey) {
+            document.getElementById('login-overlay').style.display = 'none';
+            document.getElementById('main-app').style.display = 'block';
+            startSync();
+        } else {
+            alert("❌ INVALID VIP KEY! Contact @Zain_ModX");
+        }
+    }
+
+    function toggleTheme() { document.body.classList.toggle('light-theme'); }
+
+    function startSync() {
+        setInterval(() => {
+            let s = 60 - new Date().getSeconds();
+            document.getElementById('timer').innerText = s < 10 ? `00:0${s}` : `00:${s}`;
+            if(s === 59 || s === 1) fetchServerData();
+            updateLiveStats();
+        }, 1000);
+        fetchServerData();
+    }
+
+    function updateLiveStats() {
+        document.getElementById('d-time').innerText = new Date().toLocaleTimeString([], {hour:'numeric', minute:'2-digit', second:'2-digit', hour12: true});
+        if(navigator.getBattery) {
+            navigator.getBattery().then(b => document.getElementById('d-batt').innerText = `BATT: ${Math.round(b.level*100)}%`);
+        }
+    }
+
+    async function fetchServerData() {
+        try {
+            const res = await fetch("https://draw.ar-lottery01.com/WinGo/WinGo_1M/GetHistoryIssuePage.json");
+            const json = await res.json();
+            const list = json.data.list;
+            const latest = list[0];
+
+            if(lastP !== latest.issueNumber) {
+                if(currentPred !== "" && lastP !== "") {
+                    const realS = parseInt(latest.number) >= 5 ? "BIG" : "SMALL";
+                    historyData.unshift({ p: latest.issueNumber.slice(-3), n: latest.number, s: realS, win: (currentPred === realS) });
+                }
+                lastP = latest.issueNumber;
+                runNeuralEngine(list);
+                renderHistory();
+            }
+        } catch (e) { console.error("Sync Error"); }
+    }
+
+    function runNeuralEngine(list) {
+        const nums = list.slice(0, 10).map(x => parseInt(x.number));
+        let trendScore = (nums[0] > nums[1] ? 60 : 40) + (Math.random()*15);
+        let volScore = Math.abs(nums[0] - nums[1]) * 10 + (Math.random()*20);
+        let bigs = nums.filter(n => n >= 5).length;
+        let patternScore = bigs * 10 + (Math.random()*10);
+        let seqScore = (nums[0] === nums[1] ? 80 : 20) + (Math.random()*10);
+
+        document.getElementById('val-pattern').innerText = Math.min(99, Math.round(patternScore)) + "%";
+        document.getElementById('val-trend').innerText = Math.min(99, Math.round(trendScore)) + "%";
+        document.getElementById('val-sequence').innerText = Math.min(99, Math.round(seqScore)) + "%";
+        document.getElementById('val-volat').innerText = Math.min(99, Math.round(volScore)) + "%";
+
+        if(patternScore > 60 || trendScore > 65) currentPred = "BIG";
+        else if(patternScore < 40 || trendScore < 35) currentPred = "SMALL";
+        else currentPred = (nums[0] % 2 === 0) ? "SMALL" : "BIG";
+
+        document.getElementById('period-id').innerText = "PERIOD: " + (BigInt(lastP) + 1n);
+        document.getElementById('main-pred').innerText = currentPred;
+        document.getElementById('main-pred').style.color = currentPred === "BIG" ? "#ff0033" : "#00ff88";
+        document.getElementById('res-num').innerText = (currentPred === "BIG" ? [5,7,9] : [1,3,4])[Math.floor(Math.random()*3)];
+        
+        window.speechSynthesis.speak(new SpeechSynthesisUtterance("Next " + currentPred));
+    }
+
+    function renderHistory() {
+        const tbody = document.getElementById('h-body');
+        tbody.innerHTML = "";
+        historyData.slice(0, 8).forEach(h => {
+            const color = (parseInt(h.n) % 2 === 0) ? "RED" : "GREEN";
+            tbody.innerHTML += `<tr>
+                <td>${h.p}</td>
+                <td style="color:var(--gold)">${h.n}</td>
+                <td style="color:${color==='RED'?'#ff0033':'#00ff88'}">${color}</td>
+                <td style="color:${h.s==='BIG'?'#ff0033':'#00ff88'}">${h.s}</td>
+                <td style="color:${h.win?'#00ff88':'#ff0033'}">${h.win?'SUCCES ':'FAILD '}</td>
+            </tr>`;
+        });
+    }
+</script>
+</body>
+                                                         </html>
